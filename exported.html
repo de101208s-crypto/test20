@@ -1,0 +1,991 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<title>Clock & Alarm</title>
+
+<style type="text/css">
+
+/* =========================================
+   iOS 4向け基本設定
+   ========================================= */
+
+html {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    color: #ffffff;
+    font-family: Helvetica, Arial, sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   スクロール領域
+   ========================================= */
+
+.app {
+    width: 100%;
+    height: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+.page {
+    width: 100%;
+    min-height: 200%;
+}
+
+
+/* =========================================
+   時計画面
+   ========================================= */
+
+.clock-area {
+    width: 100%;
+    height: 50%;
+
+    min-height: 400px;
+
+    position: relative;
+}
+
+
+/* 時計 */
+
+.clock {
+    position: absolute;
+
+    width: 100%;
+
+    top: 40%;
+
+    text-align: center;
+
+    font-size: 64px;
+    font-weight: bold;
+
+    line-height: 1.0;
+
+    white-space: nowrap;
+}
+
+
+/* 時 */
+
+.hour {
+    color: #ff493f;
+}
+
+
+/* 分 */
+
+.minute {
+    color: #aeeeff;
+}
+
+
+/* 秒 */
+
+.second {
+    color: #e8faff;
+    font-size: 32px;
+}
+
+
+/* 日付 */
+
+.date {
+    margin-top: 18px;
+
+    color: #aaaaaa;
+
+    font-size: 18px;
+    font-weight: normal;
+}
+
+
+/* アラーム状態 */
+
+.alarm-status {
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 25px;
+
+    margin-left: -90px;
+
+    width: 180px;
+    height: 36px;
+
+    line-height: 36px;
+
+    text-align: center;
+
+    border: 1px solid #333333;
+
+    border-radius: 18px;
+
+    font-size: 14px;
+}
+
+
+.off {
+    color: #666666;
+}
+
+
+.on {
+    color: #aeeeff;
+}
+
+
+/* =========================================
+   スクロール案内
+   ========================================= */
+
+.scroll-hint {
+    position: absolute;
+
+    bottom: 65px;
+
+    width: 100%;
+
+    text-align: center;
+
+    color: #444444;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   アラーム設定画面
+   ========================================= */
+
+.alarm-area {
+    width: 100%;
+    height: 50%;
+
+    min-height: 400px;
+
+    position: relative;
+
+    border-top: 1px solid #202020;
+
+    text-align: center;
+}
+
+
+/* タイトル */
+
+.alarm-title {
+    padding-top: 25px;
+
+    color: #999999;
+
+    font-size: 16px;
+
+    letter-spacing: 2px;
+}
+
+
+/* 設定時刻 */
+
+.alarm-time {
+    margin-top: 20px;
+
+    font-size: 60px;
+
+    font-weight: bold;
+}
+
+
+.alarm-hour {
+    color: #ff493f;
+}
+
+
+.alarm-minute {
+    color: #aeeeff;
+}
+
+
+/* =========================================
+   ボタン
+   ========================================= */
+
+.buttons {
+    margin-top: 15px;
+}
+
+
+.button {
+    display: inline-block;
+
+    width: 105px;
+    height: 42px;
+
+    margin: 0 4px;
+
+    line-height: 42px;
+
+    text-align: center;
+
+    border: 1px solid #444444;
+
+    border-radius: 21px;
+
+    background: #111111;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+.button:active {
+    background: #333333;
+}
+
+
+.button.blue {
+    color: #aeeeff;
+}
+
+
+.button.red {
+    color: #ff493f;
+}
+
+
+/* =========================================
+   アラーム鳴動画面
+   ========================================= */
+
+.ringing {
+    display: none;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: #000000;
+
+    z-index: 100;
+}
+
+
+.ringing-title {
+    margin-top: 25%;
+
+    color: #ff493f;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+.ringing-time {
+    margin-top: 20px;
+
+    color: #ffffff;
+
+    font-size: 64px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+.ringing-buttons {
+    margin-top: 35px;
+
+    text-align: center;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <div class="page">
+
+
+        <!-- =================================
+             時計
+             ================================= -->
+
+        <div class="clock-area">
+
+            <div class="clock">
+
+                <span id="hour" class="hour">00</span>
+                <span>:</span>
+                <span id="minute" class="minute">00</span>
+                <span>:</span>
+                <span id="second" class="second">00</span>
+
+                <div id="date" class="date">
+                    0000年00月00日
+                </div>
+
+            </div>
+
+
+            <div id="alarmStatus"
+                 class="alarm-status off">
+                ALARM OFF
+            </div>
+
+        </div>
+
+
+        <!-- =================================
+             アラーム
+             ================================= -->
+
+        <div class="alarm-area">
+
+            <div class="alarm-title">
+                ALARM
+            </div>
+
+
+            <div class="alarm-time">
+
+                <span id="alarmHour"
+                      class="alarm-hour">
+                    07
+                </span>
+
+                <span>:</span>
+
+                <span id="alarmMinute"
+                      class="alarm-minute">
+                    00
+                </span>
+
+            </div>
+
+
+            <!-- 時 -->
+
+            <div class="buttons">
+
+                <span id="hourDown"
+                      class="button">
+                    − 時
+                </span>
+
+                <span id="hourUp"
+                      class="button">
+                    ＋ 時
+                </span>
+
+            </div>
+
+
+            <!-- 分 -->
+
+            <div class="buttons">
+
+                <span id="minuteDown"
+                      class="button">
+                    − 分
+                </span>
+
+                <span id="minuteUp"
+                      class="button">
+                    ＋ 分
+                </span>
+
+            </div>
+
+
+            <!-- SET / OFF -->
+
+            <div class="buttons">
+
+                <span id="setButton"
+                      class="button blue">
+                    SET
+                </span>
+
+                <span id="offButton"
+                      class="button red">
+                    OFF
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         アラーム鳴動画面
+         ===================================== -->
+
+    <div id="ringing"
+         class="ringing">
+
+        <div class="ringing-title">
+            ALARM
+        </div>
+
+
+        <div id="ringingTime"
+             class="ringing-time">
+            07:00
+        </div>
+
+
+        <div class="ringing-buttons">
+
+            <span id="snoozeButton"
+                  class="button blue">
+                5分後
+            </span>
+
+            <span id="stopButton"
+                  class="button red">
+                止める
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+
+/* =========================================
+   iOS 4互換JavaScript
+   ========================================= */
+
+
+/* =========================================
+   2桁表示
+   ========================================= */
+
+function pad(number) {
+
+    if (number < 10) {
+        return "0" + number;
+    }
+
+    return "" + number;
+}
+
+
+/* =========================================
+   時計
+   ========================================= */
+
+function updateClock() {
+
+    var now;
+    var h;
+    var m;
+    var s;
+
+    var y;
+    var month;
+    var d;
+
+
+    now = new Date();
+
+
+    h = now.getHours();
+    m = now.getMinutes();
+    s = now.getSeconds();
+
+
+    y = now.getFullYear();
+    month = now.getMonth() + 1;
+    d = now.getDate();
+
+
+    document.getElementById("hour").innerHTML =
+        pad(h);
+
+
+    document.getElementById("minute").innerHTML =
+        pad(m);
+
+
+    document.getElementById("second").innerHTML =
+        pad(s);
+
+
+    document.getElementById("date").innerHTML =
+        y + "年" +
+        pad(month) + "月" +
+        pad(d) + "日";
+
+
+    checkAlarm(h, m, s);
+}
+
+
+/* =========================================
+   アラーム変数
+   ========================================= */
+
+var alarmHour = 7;
+
+var alarmMinute = 0;
+
+var alarmEnabled = false;
+
+var alarmAlreadyTriggered = false;
+
+
+/* =========================================
+   アラーム表示
+   ========================================= */
+
+function updateAlarmDisplay() {
+
+    document.getElementById(
+        "alarmHour"
+    ).innerHTML = pad(alarmHour);
+
+
+    document.getElementById(
+        "alarmMinute"
+    ).innerHTML = pad(alarmMinute);
+}
+
+
+/* =========================================
+   アラーム状態表示
+   ========================================= */
+
+function updateAlarmStatus() {
+
+    var status;
+
+    status =
+        document.getElementById(
+            "alarmStatus"
+        );
+
+
+    if (alarmEnabled) {
+
+        status.innerHTML =
+            "ALARM " +
+            pad(alarmHour) +
+            ":" +
+            pad(alarmMinute);
+
+        status.className =
+            "alarm-status on";
+
+    } else {
+
+        status.innerHTML =
+            "ALARM OFF";
+
+        status.className =
+            "alarm-status off";
+    }
+}
+
+
+/* =========================================
+   時間変更
+   ========================================= */
+
+document.getElementById(
+    "hourUp"
+).onclick = function() {
+
+    alarmHour++;
+
+    if (alarmHour > 23) {
+        alarmHour = 0;
+    }
+
+    updateAlarmDisplay();
+};
+
+
+document.getElementById(
+    "hourDown"
+).onclick = function() {
+
+    alarmHour--;
+
+    if (alarmHour < 0) {
+        alarmHour = 23;
+    }
+
+    updateAlarmDisplay();
+};
+
+
+/* =========================================
+   分変更
+   ========================================= */
+
+document.getElementById(
+    "minuteUp"
+).onclick = function() {
+
+    alarmMinute += 5;
+
+
+    if (alarmMinute >= 60) {
+
+        alarmMinute = 0;
+
+        alarmHour++;
+
+
+        if (alarmHour > 23) {
+            alarmHour = 0;
+        }
+    }
+
+
+    updateAlarmDisplay();
+};
+
+
+document.getElementById(
+    "minuteDown"
+).onclick = function() {
+
+    alarmMinute -= 5;
+
+
+    if (alarmMinute < 0) {
+
+        alarmMinute = 55;
+
+        alarmHour--;
+
+
+        if (alarmHour < 0) {
+            alarmHour = 23;
+        }
+    }
+
+
+    updateAlarmDisplay();
+};
+
+
+/* =========================================
+   SET
+   ========================================= */
+
+document.getElementById(
+    "setButton"
+).onclick = function() {
+
+    alarmEnabled = true;
+
+    alarmAlreadyTriggered = false;
+
+    updateAlarmStatus();
+
+    prepareSound();
+};
+
+
+/* =========================================
+   OFF
+   ========================================= */
+
+document.getElementById(
+    "offButton"
+).onclick = function() {
+
+    alarmEnabled = false;
+
+    alarmAlreadyTriggered = false;
+
+    stopAlarm();
+
+    updateAlarmStatus();
+};
+
+
+/* =========================================
+   アラーム判定
+   ========================================= */
+
+function checkAlarm(h, m, s) {
+
+    if (!alarmEnabled) {
+        return;
+    }
+
+
+    if (alarmAlreadyTriggered) {
+        return;
+    }
+
+
+    if (h == alarmHour &&
+        m == alarmMinute &&
+        s == 0) {
+
+        alarmAlreadyTriggered = true;
+
+        startAlarm();
+    }
+}
+
+
+/* =========================================
+   アラーム開始
+   ========================================= */
+
+function startAlarm() {
+
+    var box;
+
+
+    box =
+        document.getElementById(
+            "ringing"
+        );
+
+
+    box.style.display = "block";
+
+
+    document.getElementById(
+        "ringingTime"
+    ).innerHTML =
+        pad(alarmHour) +
+        ":" +
+        pad(alarmMinute);
+
+
+    playAlarmSound();
+}
+
+
+/* =========================================
+   アラーム停止
+   ========================================= */
+
+function stopAlarm() {
+
+    var box;
+
+
+    box =
+        document.getElementById(
+            "ringing"
+        );
+
+
+    box.style.display = "none";
+
+
+    stopAlarmSound();
+}
+
+
+/* =========================================
+   スヌーズ
+   ========================================= */
+
+document.getElementById(
+    "snoozeButton"
+).onclick = function() {
+
+    stopAlarm();
+
+
+    alarmEnabled = true;
+
+
+    alarmMinute += 5;
+
+
+    if (alarmMinute >= 60) {
+
+        alarmMinute -= 60;
+
+        alarmHour++;
+
+
+        if (alarmHour >= 24) {
+            alarmHour = 0;
+        }
+    }
+
+
+    alarmAlreadyTriggered = false;
+
+
+    updateAlarmDisplay();
+
+    updateAlarmStatus();
+};
+
+
+/* =========================================
+   停止
+   ========================================= */
+
+document.getElementById(
+    "stopButton"
+).onclick = function() {
+
+    stopAlarm();
+
+
+    alarmEnabled = false;
+
+    alarmAlreadyTriggered = false;
+
+
+    updateAlarmStatus();
+};
+
+
+/* =========================================
+   アラーム音
+   ========================================= */
+
+var alarmAudio = null;
+
+
+function prepareSound() {
+
+    if (alarmAudio != null) {
+        return;
+    }
+
+
+    alarmAudio =
+        document.createElement(
+            "audio"
+        );
+
+
+    alarmAudio.setAttribute(
+        "preload",
+        "auto"
+    );
+
+
+    /*
+     * index.htmlと同じ場所に
+     *
+     * alarm.mp3
+     *
+     * を置く。
+     */
+
+    alarmAudio.src =
+        "alarm.mp3";
+
+
+    try {
+        alarmAudio.load();
+    }
+    catch (e) {
+    }
+}
+
+
+function playAlarmSound() {
+
+    if (alarmAudio == null) {
+        prepareSound();
+    }
+
+
+    if (alarmAudio != null) {
+
+        try {
+
+            alarmAudio.loop = true;
+
+            alarmAudio.play();
+
+        }
+        catch (e) {
+        }
+    }
+}
+
+
+function stopAlarmSound() {
+
+    if (alarmAudio != null) {
+
+        try {
+
+            alarmAudio.pause();
+
+            alarmAudio.currentTime = 0;
+
+        }
+        catch (e) {
+        }
+    }
+}
+
+
+/* =========================================
+   初期化
+   ========================================= */
+
+updateAlarmDisplay();
+
+updateAlarmStatus();
+
+updateClock();
+
+
+setInterval(
+    updateClock,
+    1000
+);
+
+</script>
+
+</body>
+</html>
+```
